@@ -25,8 +25,6 @@ I type fast. I think faster. I constantly lose thoughts mid-sentence because my 
 - Only worked inside one specific app
 - Required me to stop what I was doing and switch contexts
 
-macOS has built-in Dictation — but it phones home to Apple servers, can't be customized, and doesn't stream text live as you speak.
-
 So I built MindScript. One hotkey. Fully local Whisper inference on the Apple Neural Engine. Live text streaming directly at your cursor, in any app, in any language. After the first model download (~75MB, one-time), it costs absolutely nothing to run.
 
 I open-sourced it because this should exist for everyone, for free, without a per-minute tax to a cloud provider.
@@ -43,28 +41,40 @@ xcode-select --install   # skip if already installed
 ```
 
 ```bash
-git clone https://github.com/qasimtalkin/mindscript
-cd mindscript
+git clone https://github.com/qasimtalkin/mindscript && cd mindscript
 bash scripts/build.sh
 open dist/MindScript.app
 ```
 
-**One-time permission:** Click the mic icon in your menubar → click the orange banner → System Settings → toggle MindScript **ON** under Accessibility.
 
-That's it. You're done. Press **Ctrl+0** to start recording anywhere.
+## 🛠 How to switch Whisper models (Step-by-Step)
+
+If you have a high-end Mac (M2/M3 with 16GB+ RAM) and want better accuracy, you can switch from the default **Tiny** model to **Base**, **Small**, or **Large**.
+
+1.  **Open the Config File:**
+    Navigate to `MindScript/Sources/MindScript/Utilities/Constants.swift`.
+2.  **Change the Model Name:**
+    Find the line `static let freeTierModelName` and change the value:
+    -   `openai_whisper-tiny` (Default, ~75MB)
+    -   `openai_whisper-base` (~145MB)
+    -   `openai_whisper-small` (~450MB)
+    -   `openai_whisper-large-v3` (~1.5GB)
+3.  **Rebuild the App:**
+    From the root of the project, run the build script: `bash scripts/build.sh`
+4.  **Restart MindScript:**
+    Open the newly built app from `dist/MindScript.app`. It will download the new model automatically on the first launch.
 
 ---
 
-## How to use
+### 2. Grant Permissions
+MindScript needs two one-time permissions to work:
+- **Microphone:** To hear you.
+- **Accessibility:** To "type" the text into your active apps.
 
-| Action | Key |
-|---|---|
-| Start recording | **Ctrl+0** |
-| Stop + inject text at cursor | **Escape** |
-| Change language | Menubar → ⚙ Settings → Language |
-
-[language-selection.png]( language-selection.png)
-   
+### 3. Start Talking
+- **Ctrl + 0**: Start recording.
+- **Escape**: Stop and finalize.
+- **Menubar**: Change language or settings.
 
 ---
 
@@ -112,57 +122,16 @@ Your audio never leaves your machine.
 
 ---
 
-## Project structure
+## 🤝 Contributing
 
-```
-MindScript/Sources/MindScript/
-├── App/
-│   ├── Pipeline.swift             # Hotkey → record → transcribe → inject
-│   ├── AppState.swift             # @Observable global state
-│   └── AppDelegate.swift          # NSStatusItem, menubar setup
-├── HotKey/HotKeyManager.swift     # Ctrl+0 start, Escape stop
-├── Audio/
-│   ├── RecordingManager.swift     # AVAudioEngine mic tap
-│   └── AudioBuffer.swift          # Resample to 16 kHz WAV
-├── Transcription/
-│   └── TranscriptionService.swift # WhisperKit wrapper, language passthrough
-├── Injection/
-│   └── TextInjector.swift         # CGEvent → AppleScript fallback
-└── UI/
-    ├── MenuBarView.swift
-    ├── SettingsView.swift
-    └── TranscriptionOverlay.swift
-```
+Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
----
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Troubleshooting
-
-**Text isn't appearing at my cursor**
-Open the menubar popover. If there's an orange banner, click it → System Settings → Accessibility → toggle MindScript ON.
-
-**App stuck on "Loading Whisper model"**
-First launch downloads ~75 MB. Check your internet connection. To force a re-download, delete `~/Library/Caches/huggingface/`.
-
-**Accessibility permission keeps disappearing after rebuild**
-This is fixed in the current build — a stable self-signed cert keeps TCC permission alive across rebuilds. If it breaks, run `bash scripts/build.sh` again and re-grant once.
-
-**App doesn't show in menubar**
-Run `open dist/MindScript.app` from the project root. Check Console.app filtered to "MindScript" for crash logs.---
-
-## Contributing
-
-PRs welcome. The codebase is intentionally small and focused.
-
-If you find a bug, open an issue with:
-1. macOS version
-2. Mac model (M1/M2/M3 etc.)
-3. The app you were transcribing into
-4. What happened vs. what you expected
-
-If you want to add a feature, open an issue first so we can discuss it before you write the code.
-
----
 ---
 
 ## License
@@ -179,3 +148,7 @@ MIT — Use it, fork it, ship it, sell it. Credit appreciated but not required.
 - [Sparkle](https://sparkle-project.org) — the standard for macOS auto-updates
 
 ---
+
+<div align="center">
+Built with ❤️ for the Mac community.
+</div>

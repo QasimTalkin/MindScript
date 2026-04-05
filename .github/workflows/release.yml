@@ -1,0 +1,36 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Swift
+        uses: fwal/setup-swift@v1
+        with:
+          swift-version: '5.9'
+
+      - name: Build MindScript
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
+
+      - name: Package App
+        run: |
+          cd dist
+          zip -r MindScript.zip MindScript.app
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/MindScript.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

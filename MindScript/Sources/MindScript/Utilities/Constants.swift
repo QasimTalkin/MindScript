@@ -2,7 +2,7 @@ import Foundation
 
 enum Constants {
     // Tier model names
-    static let freeTierModelName = "openai_whisper-tiny"
+    static let freeTierModelName = "openai_whisper-small"
     static let proTierModelName  = "openai_whisper-base"
 
     // Metering — set to .infinity for fully local builds (no server-side limit)
