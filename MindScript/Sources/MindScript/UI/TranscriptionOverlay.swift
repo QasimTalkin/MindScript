@@ -31,9 +31,6 @@ final class TranscriptionOverlay {
         self.panel = panel
     }
 
-    // No-op — text is now typed at cursor, not shown in the overlay
-    func updateLiveText(_ text: String) {}
-
     func dismiss() {
         panel?.orderOut(nil)
         panel = nil

@@ -1,28 +1,18 @@
 import AppKit
 import SwiftUI
-import Sparkle
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
-    private var updaterController: SPUStandardUpdaterController!
+    private var stateObserverTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("DEBUG: applicationDidFinishLaunching")
-        // Menubar-only: no Dock icon, no app switcher entry
         NSApp.setActivationPolicy(.accessory)
-
-        // Don't start Sparkle auto-updater in local dev builds (placeholder feed URL would crash)
-        // setupSparkle()
-        print("DEBUG: calling setupStatusItem")
         setupStatusItem()
-        print("DEBUG: calling setupPopover")
         setupPopover()
-        print("DEBUG: calling setupPipeline")
-        setupPipeline()
+        Pipeline.shared.start()
 
-        // Handle mindscript:// URL scheme (e.g. mindscript://upgrade-success)
         NSAppleEventManager.shared().setEventHandler(
             self,
             andSelector: #selector(handleURLEvent(_:withReplyEvent:)),
@@ -35,70 +25,54 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Setup
-
-    private func setupSparkle() {
-        updaterController = SPUStandardUpdaterController(
-            startingUpdater: true,
-            updaterDelegate: nil,
-            userDriverDelegate: nil
-        )
+    func applicationWillTerminate(_ notification: Notification) {
+        stateObserverTask?.cancel()
     }
+
+    // MARK: - Status item
 
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        guard let button = statusItem.button else {
-            print("DEBUG: statusItem.button is nil — status item creation failed")
-            return
-        }
-        print("DEBUG: statusItem.button exists, setting image")
+        guard let button = statusItem.button else { return }
         button.image = NSImage(systemSymbolName: "mic", accessibilityDescription: "MindScript")
         button.image?.isTemplate = true
         button.action = #selector(togglePopover)
         button.target = self
-        updateStatusIcon()
 
-        // Observe state changes to update icon
-        Task { @MainActor in
+        stateObserverTask = Task { [weak self] in
             for await _ in NotificationCenter.default.notifications(named: .mindscriptStateChanged) {
-                self.updateStatusIcon()
+                self?.updateStatusIcon()
             }
         }
     }
+
+    private func updateStatusIcon() {
+        guard let button = statusItem.button else { return }
+        let state = AppState.shared
+        let symbolName: String
+        if state.isRecording {
+            symbolName = "record.circle.fill"
+        } else if state.isTranscribing {
+            symbolName = "waveform"
+        } else if state.errorMessage != nil {
+            symbolName = "exclamationmark.circle"
+        } else {
+            symbolName = "mic"
+        }
+        button.image = NSImage(systemSymbolName: symbolName, accessibilityDescription: "MindScript")
+        button.image?.isTemplate = true
+    }
+
+    // MARK: - Popover
 
     private func setupPopover() {
         popover = NSPopover()
         popover.contentSize = NSSize(width: 320, height: 400)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(
-            rootView: MenuBarView()
-                .environment(AppState.shared)
+            rootView: MenuBarView().environment(AppState.shared)
         )
     }
-
-    private func setupPipeline() {
-        // Wire up the full transcription pipeline
-        Pipeline.shared.start()
-    }
-
-    // MARK: - Status icon
-
-    private func updateStatusIcon() {
-        guard let button = statusItem.button else { return }
-        let state = AppState.shared
-        if state.isRecording {
-            button.image = NSImage(systemSymbolName: "record.circle.fill", accessibilityDescription: "Recording")
-        } else if state.isTranscribing {
-            button.image = NSImage(systemSymbolName: "waveform", accessibilityDescription: "Transcribing")
-        } else if state.errorMessage != nil {
-            button.image = NSImage(systemSymbolName: "exclamationmark.circle", accessibilityDescription: "Error")
-        } else {
-            button.image = NSImage(systemSymbolName: "mic", accessibilityDescription: "MindScript")
-        }
-        button.image?.isTemplate = true
-    }
-
-    // MARK: - Popover
 
     @objc private func togglePopover() {
         if popover.isShown {
@@ -110,21 +84,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showPopover() {
         guard let button = statusItem.button else { return }
-        NSApp.activate(ignoringOtherApps: true)
+        NSApp.activate()
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
     }
 
-    // MARK: - URL scheme handler
+    // MARK: - URL scheme (mindscript://upgrade-success)
 
-    @objc private func handleURLEvent(_ event: NSAppleEventDescriptor, withReplyEvent _: NSAppleEventDescriptor) {
-        guard let urlString = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue,
-              let url = URL(string: urlString) else { return }
+    @objc private func handleURLEvent(
+        _ event: NSAppleEventDescriptor,
+        withReplyEvent _: NSAppleEventDescriptor
+    ) {
+        guard
+            let urlString = event.paramDescriptor(forKeyword: keyDirectObject)?.stringValue,
+            let url = URL(string: urlString),
+            url.host == "upgrade-success"
+        else { return }
 
-        if url.host == "upgrade-success" {
-            Task {
-                await AuthManager.shared.refreshProfile()
-                await MeteringService.shared.syncFromServer()
-            }
+        Task {
+            await AuthManager.shared.refreshProfile()
+            await MeteringService.shared.syncFromServer()
         }
     }
 }

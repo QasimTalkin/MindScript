@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎙 MindScript
+# 🎙 MindScript - Free Multilingual Personal Scribe On Mac
 
 ### Free, local, instant voice-to-text for your Mac.
 ### No cloud. No subscription. No one listening.
@@ -33,19 +33,6 @@ I open-sourced it because this should exist for everyone, for free, without a pe
 
 ---
 
-## Demo
-
-```
-You're in VS Code writing a comment.
-Press Ctrl+0.
-Start talking.
-Text appears at your cursor, word by word, as you speak.
-Press Escape when done.
-```
-
-Works in: VS Code, terminal, browser, Slack, Notes, email, anywhere.
-
----
 
 ## Run it locally in 3 steps
 
@@ -189,7 +176,6 @@ MIT — Use it, fork it, ship it, sell it. Credit appreciated but not required.
 - [WhisperKit](https://github.com/argmaxinc/WhisperKit) by Argmax — the CoreML/ANE wrapper that makes on-device Whisper fast on Apple Silicon
 - [OpenAI Whisper](https://github.com/openai/whisper) — the underlying model weights
 - [HotKey](https://github.com/soffes/HotKey) by Sam Soffes — the cleanest global hotkey library for macOS
-- [Supabase](https://supabase.com) — open source Firebase alternative for auth + database
 - [Sparkle](https://sparkle-project.org) — the standard for macOS auto-updates
 
 ---

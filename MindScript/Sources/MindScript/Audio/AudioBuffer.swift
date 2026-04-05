@@ -1,25 +1,20 @@
 import AVFoundation
 import os
 
-/// Converts an array of AVAudioPCMBuffers into a single 16kHz mono WAV file
-/// that is suitable for Whisper input.
+/// Converts AVAudioPCMBuffers into a 16 kHz mono WAV file for Whisper.
 enum AudioBuffer {
-    static func write(_ buffers: [AVAudioPCMBuffer], to url: URL) throws {
-        guard !buffers.isEmpty else {
-            throw AudioError.emptyBuffer
-        }
 
-        let targetFormat = AVAudioFormat(
+    static func write(_ buffers: [AVAudioPCMBuffer], to url: URL) throws {
+        guard !buffers.isEmpty else { throw AudioError.emptyBuffer }
+
+        guard let targetFormat = AVAudioFormat(
             commonFormat: .pcmFormatFloat32,
             sampleRate: Constants.audioSampleRate,
             channels: Constants.audioChannelCount,
             interleaved: false
-        )!
+        ) else { throw AudioError.formatCreationFailed }
 
-        // If the buffers are already in the target format, write directly.
-        // Otherwise, resample via AVAudioConverter.
         let sourceFormat = buffers[0].format
-
         let settings: [String: Any] = [
             AVFormatIDKey: kAudioFormatLinearPCM,
             AVSampleRateKey: Constants.audioSampleRate,
@@ -30,44 +25,44 @@ enum AudioBuffer {
             AVLinearPCMIsNonInterleaved: true,
         ]
 
-        let outputFile = try AVAudioFile(forWriting: url, settings: settings, commonFormat: .pcmFormatFloat32, interleaved: false)
+        let outputFile = try AVAudioFile(
+            forWriting: url,
+            settings: settings,
+            commonFormat: .pcmFormatFloat32,
+            interleaved: false
+        )
 
         if sourceFormat == targetFormat {
-            for buffer in buffers {
-                try outputFile.write(from: buffer)
-            }
-        } else {
-            guard let converter = AVAudioConverter(from: sourceFormat, to: targetFormat) else {
-                throw AudioError.converterCreationFailed
-            }
-
-            for buffer in buffers {
-                let frameCount = AVAudioFrameCount(
-                    Double(buffer.frameLength) * Constants.audioSampleRate / sourceFormat.sampleRate
-                )
-                guard let converted = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: frameCount) else {
-                    throw AudioError.bufferAllocationFailed
-                }
-
-                var error: NSError?
-                var inputConsumed = false
-
-                converter.convert(to: converted, error: &error) { _, outStatus in
-                    if inputConsumed {
-                        outStatus.pointee = .noDataNow
-                        return nil
-                    }
-                    outStatus.pointee = .haveData
-                    inputConsumed = true
-                    return buffer
-                }
-
-                if let error { throw error }
-                try outputFile.write(from: converted)
-            }
+            for buffer in buffers { try outputFile.write(from: buffer) }
+            return
         }
 
-        Logger.recording.info("WAV written to \(url.path) — \(buffers.count) buffers")
+        guard let converter = AVAudioConverter(from: sourceFormat, to: targetFormat) else {
+            throw AudioError.converterCreationFailed
+        }
+
+        for buffer in buffers {
+            let frameCount = AVAudioFrameCount(
+                Double(buffer.frameLength) * Constants.audioSampleRate / sourceFormat.sampleRate
+            )
+            guard let converted = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: frameCount) else {
+                throw AudioError.bufferAllocationFailed
+            }
+
+            var inputConsumed = false
+            var conversionError: NSError?
+            converter.convert(to: converted, error: &conversionError) { _, outStatus in
+                if inputConsumed {
+                    outStatus.pointee = .noDataNow
+                    return nil
+                }
+                outStatus.pointee = .haveData
+                inputConsumed = true
+                return buffer
+            }
+            if let err = conversionError { throw err }
+            try outputFile.write(from: converted)
+        }
     }
 
     static func temporaryURL() -> URL {
@@ -78,12 +73,14 @@ enum AudioBuffer {
 
 enum AudioError: LocalizedError {
     case emptyBuffer
+    case formatCreationFailed
     case converterCreationFailed
     case bufferAllocationFailed
 
     var errorDescription: String? {
         switch self {
-        case .emptyBuffer: return "No audio was recorded."
+        case .emptyBuffer:            return "No audio was recorded."
+        case .formatCreationFailed:   return "Could not create 16 kHz audio format."
         case .converterCreationFailed: return "Could not create audio format converter."
         case .bufferAllocationFailed: return "Could not allocate converted audio buffer."
         }
