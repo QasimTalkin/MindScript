@@ -1,8 +1,8 @@
 import Foundation
 
 enum Constants {
-    // Freemium limits
-    static let freeMonthlyLimitSeconds: Double = 3600   // 60 minutes
+    // Limits — set to .infinity for fully local/free builds (no server cost)
+    static let freeMonthlyLimitSeconds: Double = .infinity
     static let freeTierModelName = "openai_whisper-tiny"
     static let proTierModelName  = "openai_whisper-base"
 
@@ -23,4 +23,25 @@ enum Constants {
 
     // Injection
     static let injectionActivationDelayMs: UInt64 = 50
+
+    // Languages — (display name, ISO 639-1 code). nil code = Whisper auto-detect.
+    static let supportedLanguages: [(name: String, code: String?)] = [
+        ("Auto-detect",  nil),
+        ("English",      "en"),
+        ("Spanish",      "es"),
+        ("French",       "fr"),
+        ("German",       "de"),
+        ("Italian",      "it"),
+        ("Portuguese",   "pt"),
+        ("Russian",      "ru"),
+        ("Chinese",      "zh"),
+        ("Japanese",     "ja"),
+        ("Korean",       "ko"),
+        ("Arabic",       "ar"),
+        ("Hindi",        "hi"),
+        ("Urdu",         "ur"),
+        ("Turkish",      "tr"),
+        ("Dutch",        "nl"),
+        ("Polish",       "pl"),
+    ]
 }

@@ -9,6 +9,7 @@ final class AppState {
     var isRecording = false
     var isTranscribing = false
     var lastTranscription: String = ""
+    var partialTranscription: String = ""   // live text shown while recording
     var errorMessage: String? = nil
 
     // Auth
@@ -22,6 +23,11 @@ final class AppState {
         userTier == .free && monthlySecondsUsed >= Constants.freeMonthlyLimitSeconds
     }
 
+    // Language — nil = Whisper auto-detect
+    var transcriptionLanguage: String? {
+        didSet { UserDefaults.standard.set(transcriptionLanguage, forKey: "transcriptionLanguage") }
+    }
+
     // Onboarding
     var hasCompletedOnboarding = false
     var isModelDownloaded = false
@@ -29,6 +35,7 @@ final class AppState {
 
     private init() {
         hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+        transcriptionLanguage = UserDefaults.standard.string(forKey: "transcriptionLanguage")
     }
 }
 

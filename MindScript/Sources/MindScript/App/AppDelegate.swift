@@ -2,18 +2,24 @@ import AppKit
 import SwiftUI
 import Sparkle
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var updaterController: SPUStandardUpdaterController!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        print("DEBUG: applicationDidFinishLaunching")
         // Menubar-only: no Dock icon, no app switcher entry
         NSApp.setActivationPolicy(.accessory)
 
-        setupSparkle()
+        // Don't start Sparkle auto-updater in local dev builds (placeholder feed URL would crash)
+        // setupSparkle()
+        print("DEBUG: calling setupStatusItem")
         setupStatusItem()
+        print("DEBUG: calling setupPopover")
         setupPopover()
+        print("DEBUG: calling setupPipeline")
         setupPipeline()
 
         // Handle mindscript:// URL scheme (e.g. mindscript://upgrade-success)
@@ -41,7 +47,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func setupStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        guard let button = statusItem.button else { return }
+        guard let button = statusItem.button else {
+            print("DEBUG: statusItem.button is nil — status item creation failed")
+            return
+        }
+        print("DEBUG: statusItem.button exists, setting image")
         button.image = NSImage(systemSymbolName: "mic", accessibilityDescription: "MindScript")
         button.image?.isTemplate = true
         button.action = #selector(togglePopover)

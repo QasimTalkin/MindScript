@@ -9,13 +9,9 @@ struct MenuBarView: View {
             Divider()
             statusSection
             Divider()
-            if state.errorMessage == "monthly_limit_reached" {
-                UpgradeView()
-            } else {
-                usageSection
-            }
+            languageSection
             Divider()
-            footerActions
+            footer
         }
         .frame(width: 300)
     }
@@ -30,15 +26,6 @@ struct MenuBarView: View {
             Text("MindScript")
                 .font(.headline)
             Spacer()
-            if state.userTier == .pro {
-                Text("PRO")
-                    .font(.caption2.weight(.bold))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .clipShape(Capsule())
-            }
         }
         .padding()
     }
@@ -61,7 +48,9 @@ struct MenuBarView: View {
                     .lineLimit(2)
             }
 
-            if let error = state.errorMessage, error != "monthly_limit_reached" {
+            if state.errorMessage == "needs_accessibility" {
+                accessibilityPrompt
+            } else if let error = state.errorMessage {
                 Text(error)
                     .font(.caption)
                     .foregroundColor(.red)
@@ -72,50 +61,54 @@ struct MenuBarView: View {
         .padding()
     }
 
-    private var usageSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if state.userTier == .free {
-                let used = state.monthlySecondsUsed / 60
-                let total = Constants.freeMonthlyLimitSeconds / 60
-                let fraction = min(state.monthlySecondsUsed / Constants.freeMonthlyLimitSeconds, 1.0)
-
-                HStack {
-                    Text("Monthly usage")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(Int(used)) / \(Int(total)) min")
-                        .font(.caption.monospacedDigit())
-                        .foregroundColor(.secondary)
+    private var languageSection: some View {
+        HStack {
+            Text("Language")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Picker("", selection: Binding(
+                get: { AppState.shared.transcriptionLanguage },
+                set: { AppState.shared.transcriptionLanguage = $0 }
+            )) {
+                ForEach(Constants.supportedLanguages, id: \.code) { lang in
+                    Text(lang.name).tag(lang.code)
                 }
-
-                ProgressView(value: fraction)
-                    .tint(fraction > 0.8 ? .orange : .accentColor)
-            } else {
-                Label("Unlimited transcriptions", systemImage: "infinity")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
+            .labelsHidden()
+            .frame(width: 140)
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
-    private var footerActions: some View {
-        HStack {
-            if state.isSignedIn {
-                Text(state.userEmail ?? "Signed in")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                Spacer()
-            } else {
-                Button("Sign In") {
-                    // Open OnboardingView / auth sheet
-                }
+    private var accessibilityPrompt: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Accessibility permission needed", systemImage: "exclamationmark.triangle.fill")
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.orange)
+            Text("MindScript needs Accessibility access to type into other apps.")
                 .font(.caption)
-                Spacer()
+                .foregroundColor(.secondary)
+            Button("Open System Settings →") {
+                Permissions.requestAccessibility()
+                AppState.shared.errorMessage = nil
             }
+            .font(.caption.weight(.medium))
+            .buttonStyle(.borderedProminent)
+            .controlSize(.mini)
+        }
+        .padding(8)
+        .background(Color.orange.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
 
+    private var footer: some View {
+        HStack {
+            Label("Unlimited — running locally", systemImage: "lock.open")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            Spacer()
             Button(action: { NSApp.terminate(nil) }) {
                 Image(systemName: "power")
                     .foregroundColor(.secondary)
@@ -137,12 +130,10 @@ struct MenuBarView: View {
     }
 
     private var statusText: String {
-        if state.isRecording { return "Recording… (release ⌃0 to stop)" }
+        if state.isRecording { return "Recording… press Esc to finish" }
         if state.isTranscribing { return "Transcribing…" }
-        if !state.isModelDownloaded {
-            let pct = Int(state.modelDownloadProgress * 100)
-            return "Downloading model… \(pct)%"
-        }
+        if !state.isModelDownloaded { return "Loading Whisper model… (first run only)" }
+        if state.errorMessage == "needs_accessibility" { return "Permission required" }
         return "Ready — press ⌃0 to start"
     }
 }

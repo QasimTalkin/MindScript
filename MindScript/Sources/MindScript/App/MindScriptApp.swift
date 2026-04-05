@@ -8,7 +8,8 @@ struct MindScriptApp: App {
         // No window scenes — this is a menubar-only app.
         // All UI is driven from AppDelegate via NSStatusItem.
         Settings {
-            EmptyView()
+            SettingsView()
+                .environment(AppState.shared)
         }
     }
 }

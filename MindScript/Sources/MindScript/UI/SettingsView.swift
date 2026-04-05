@@ -4,33 +4,16 @@ struct SettingsView: View {
     @Environment(AppState.self) private var state
     @State private var selectedModel: String = Constants.freeTierModelName
 
+    // Binding-compatible wrapper for the @Observable language property
+    private var languageBinding: Binding<String?> {
+        Binding(
+            get: { AppState.shared.transcriptionLanguage },
+            set: { AppState.shared.transcriptionLanguage = $0 }
+        )
+    }
+
     var body: some View {
         Form {
-            Section("Account") {
-                if state.isSignedIn {
-                    LabeledContent("Email", value: state.userEmail ?? "—")
-                    LabeledContent("Plan") {
-                        HStack {
-                            Text(state.userTier == .pro ? "Pro" : "Free")
-                            if state.userTier == .free {
-                                Button("Upgrade") {
-                                    guard let url = URL(string: Constants.stripeProMonthlyURL) else { return }
-                                    NSWorkspace.shared.open(url)
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .controlSize(.mini)
-                            }
-                        }
-                    }
-                    Button("Sign Out", role: .destructive) {
-                        Task { try? await AuthManager.shared.signOut() }
-                    }
-                } else {
-                    Text("Not signed in")
-                        .foregroundColor(.secondary)
-                }
-            }
-
             Section("Transcription") {
                 Picker("Model", selection: $selectedModel) {
                     Text("Whisper Tiny (faster)").tag(Constants.freeTierModelName)
@@ -39,6 +22,15 @@ struct SettingsView: View {
                         .disabled(state.userTier != .pro)
                 }
                 .pickerStyle(.radioGroup)
+
+                Picker("Language", selection: languageBinding) {
+                    ForEach(Constants.supportedLanguages, id: \.code) { lang in
+                        Text(lang.name).tag(lang.code)
+                    }
+                }
+                Text("Auto-detect works well for most languages. Pin a language for faster, more accurate results when you always speak the same one.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Section("Hotkey") {

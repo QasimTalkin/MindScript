@@ -18,10 +18,12 @@ enum Permissions {
         AXIsProcessTrusted()
     }
 
-    /// Opens System Settings > Privacy > Accessibility with a prompt.
+    /// Opens System Settings → Privacy & Security → Accessibility.
+    /// Only call this when the user explicitly clicks a button — never call automatically.
     static func requestAccessibility() {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue(): true]
-        AXIsProcessTrustedWithOptions(options)
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
+        }
     }
 
     /// Opens System Settings > Privacy & Security > Microphone.

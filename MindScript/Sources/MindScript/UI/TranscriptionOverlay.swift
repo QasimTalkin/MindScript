@@ -1,26 +1,16 @@
 import AppKit
 import SwiftUI
 
-enum OverlayState {
-    case recording
-    case transcribing
-}
-
-/// A small floating HUD that shows recording / transcribing state.
-/// Appears near the bottom of the screen, non-activating.
 @MainActor
 final class TranscriptionOverlay {
     static let shared = TranscriptionOverlay()
-
     private var panel: NSPanel?
-
     private init() {}
 
     func show(state: OverlayState) {
         dismiss()
-
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 220, height: 48),
+            contentRect: NSRect(x: 0, y: 0, width: 260, height: 44),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -31,20 +21,18 @@ final class TranscriptionOverlay {
         panel.isOpaque = false
         panel.hasShadow = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-
-        let hostingView = NSHostingView(rootView: OverlayView(state: state))
-        panel.contentView = hostingView
-
-        // Position: bottom-center of the main screen
+        panel.contentView = NSHostingView(rootView: OverlayView(state: state))
         if let screen = NSScreen.main {
-            let x = screen.visibleFrame.midX - 110
-            let y = screen.visibleFrame.minY + 80
+            let x = screen.visibleFrame.midX - 130
+            let y = screen.visibleFrame.minY + 60
             panel.setFrameOrigin(NSPoint(x: x, y: y))
         }
-
         panel.orderFront(nil)
         self.panel = panel
     }
+
+    // No-op — text is now typed at cursor, not shown in the overlay
+    func updateLiveText(_ text: String) {}
 
     func dismiss() {
         panel?.orderOut(nil)
@@ -52,38 +40,45 @@ final class TranscriptionOverlay {
     }
 }
 
+enum OverlayState { case recording, transcribing }
+
 private struct OverlayView: View {
     let state: OverlayState
 
     var body: some View {
         HStack(spacing: 10) {
             if state == .recording {
-                Circle()
-                    .fill(Color.red)
-                    .frame(width: 10, height: 10)
-                    .overlay(
-                        Circle()
-                            .stroke(Color.red.opacity(0.4), lineWidth: 4)
-                            .scaleEffect(1.5)
-                            .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: state == .recording)
-                    )
-                Text("Recording…")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                PulsingDot()
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Recording…")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("Esc → finish & inject")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
             } else {
-                ProgressView()
-                    .scaleEffect(0.8)
-                Text("Transcribing…")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.primary)
+                ProgressView().scaleEffect(0.75)
+                Text("Finishing…")
+                    .font(.system(size: 13, weight: .semibold))
             }
+            Spacer()
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.regularMaterial)
-                .shadow(radius: 8)
-        )
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(RoundedRectangle(cornerRadius: 12).fill(.regularMaterial).shadow(radius: 8))
+    }
+}
+
+private struct PulsingDot: View {
+    @State private var pulse = false
+    var body: some View {
+        ZStack {
+            Circle().fill(Color.red.opacity(0.3))
+                .frame(width: 16, height: 16)
+                .scaleEffect(pulse ? 1.7 : 1)
+                .animation(.easeInOut(duration: 0.7).repeatForever(autoreverses: true), value: pulse)
+            Circle().fill(Color.red).frame(width: 8, height: 8)
+        }
+        .onAppear { pulse = true }
     }
 }

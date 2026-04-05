@@ -26,6 +26,10 @@
         </dict>
     </array>
 
+    <!-- App icon -->
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+
     <!-- App metadata -->
     <key>CFBundleIdentifier</key>
     <string>com.mindscript.app</string>

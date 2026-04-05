@@ -118,7 +118,6 @@ struct OnboardingView: View {
 
             TextField("your@email.com", text: $email)
                 .textFieldStyle(.roundedBorder)
-                .keyboardType(.emailAddress)
 
             if let error = errorText {
                 Text(error).font(.caption).foregroundColor(.red)

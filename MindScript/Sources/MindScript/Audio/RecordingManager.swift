@@ -15,6 +15,9 @@ final class RecordingManager {
 
     private init() {}
 
+    /// A snapshot of the audio captured so far — safe to read while recording continues.
+    var bufferSnapshot: [AVAudioPCMBuffer] { buffers }
+
     // MARK: - Public API
 
     func startRecording() {
@@ -30,9 +33,11 @@ final class RecordingManager {
                 try startEngine()
                 AppState.shared.isRecording = true
                 AppState.shared.errorMessage = nil
+                AppState.shared.partialTranscription = ""
                 recordingStartTime = Date()
                 notifyStateChange()
                 TranscriptionOverlay.shared.show(state: .recording)
+                Pipeline.shared.startStreaming()
                 Logger.recording.info("Recording started")
             } catch {
                 AppState.shared.errorMessage = error.localizedDescription
@@ -42,20 +47,17 @@ final class RecordingManager {
         }
     }
 
+    /// Stop recording and kick off transcription.
     func stopRecording() {
         guard AppState.shared.isRecording else { return }
-        AppState.shared.isRecording = false
-        notifyStateChange()
+        stopEngine()
 
         let captured = buffers
         let duration = recordingStartTime.map { Date().timeIntervalSince($0) } ?? 0
         buffers = []
         recordingStartTime = nil
 
-        engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
-
-        Logger.recording.info("Recording stopped — \(duration, format: .fixed(precision: 1))s, \(captured.count) buffers")
+        Logger.recording.info("Recording stopped — \(duration, format: .fixed(precision: 1))s")
 
         TranscriptionOverlay.shared.show(state: .transcribing)
         AppState.shared.isTranscribing = true
@@ -66,7 +68,24 @@ final class RecordingManager {
         }
     }
 
+    /// Cancel recording — discard audio, no transcription.
+    func cancelRecording() {
+        guard AppState.shared.isRecording else { return }
+        stopEngine()
+        buffers = []
+        recordingStartTime = nil
+        TranscriptionOverlay.shared.dismiss()
+        Logger.recording.info("Recording cancelled")
+    }
+
     // MARK: - Engine
+
+    private func stopEngine() {
+        AppState.shared.isRecording = false
+        notifyStateChange()
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+    }
 
     private func startEngine() throws {
         engine.reset()

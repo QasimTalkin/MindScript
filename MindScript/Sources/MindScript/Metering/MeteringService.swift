@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-/// Tracks monthly transcription usage for the freemium model.
+/// Tracks monthly transcription usage.
 ///
 /// Free tier: 60 min/month local, zero cost.
 /// Pro tier: unlimited.

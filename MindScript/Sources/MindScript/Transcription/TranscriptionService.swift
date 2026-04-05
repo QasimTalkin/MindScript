@@ -3,7 +3,8 @@ import Foundation
 import os
 
 /// Wraps WhisperKit with a single warm instance.
-/// The instance is initialized once at app start and reused for all transcriptions.
+/// WhisperKit manages its own model download/cache location automatically.
+/// We do NOT pass a custom modelFolder — that would require models to already be compiled.
 actor TranscriptionService {
     static let shared = TranscriptionService()
 
@@ -14,20 +15,19 @@ actor TranscriptionService {
 
     // MARK: - Warmup
 
-    /// Must be called once at startup (or after a model switch) to load the model into memory.
+    /// Loads (and downloads if needed) the Whisper model.
+    /// WhisperKit downloads to ~/Library/Caches/huggingface automatically.
+    /// Call once at startup; reuse the warm instance for all transcriptions.
     func warmup() async throws {
         let modelName = ModelManager.shared.modelName
         guard loadedModelName != modelName else { return }   // already warm
 
-        Logger.transcription.info("Warming up WhisperKit with model: \(modelName)")
+        Logger.transcription.info("Loading WhisperKit model: \(modelName)")
 
-        let modelDirectory = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        )[0].appendingPathComponent("MindScript/Models/\(modelName)").path
-
+        // Don't pass modelFolder — let WhisperKit use its default cache location.
+        // Passing a custom empty folder causes "file not found" errors.
         let config = WhisperKitConfig(
             model: modelName,
-            modelFolder: modelDirectory,
             verbose: false,
             logLevel: .error
         )
@@ -35,20 +35,19 @@ actor TranscriptionService {
         whisperKit = try await WhisperKit(config)
         loadedModelName = modelName
 
-        Logger.transcription.info("WhisperKit warm — model: \(modelName)")
+        Logger.transcription.info("WhisperKit ready — model: \(modelName)")
     }
 
     // MARK: - Transcribe
 
-    /// Transcribes the audio at `audioURL` and returns the trimmed text.
-    func transcribe(audioURL: URL) async throws -> String {
+    func transcribe(audioURL: URL, language: String? = nil) async throws -> String {
         guard let whisperKit else {
             throw TranscriptionError.modelNotLoaded
         }
 
         let options = DecodingOptions(
-            language: nil,          // auto-detect language
             task: .transcribe,
+            language: language,         // nil = auto-detect
             temperature: 0.0,
             temperatureFallbackCount: 5,
             sampleLength: 224,
@@ -58,7 +57,10 @@ actor TranscriptionService {
         )
 
         let results = try await whisperKit.transcribe(audioPath: audioURL.path, decodeOptions: options)
-        let text = results.compactMap { $0.text }.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = results
+            .map { $0.text }
+            .joined(separator: " ")
+            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
         Logger.transcription.info("Transcribed: \"\(text.prefix(80))\"")
         return text
@@ -70,7 +72,7 @@ enum TranscriptionError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .modelNotLoaded: return "Whisper model is not loaded. Please wait for the model to finish downloading."
+        case .modelNotLoaded: return "Model not loaded yet — please wait a moment."
         }
     }
 }
