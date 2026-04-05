@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Required for microphone access -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+
+    <!-- Required for CGEventTap (global hotkey + text injection) -->
+    <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+    <array>
+        <string>com.apple.coreservices.quarantine-resolver</string>
+    </array>
+
+    <!-- Hardened runtime: allow JIT for Swift concurrency on older macOS -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <false/>
+
+    <!-- Network client: needed for Supabase and Stripe -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- Keychain access for JWT storage -->
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.mindscript.app</string>
+    </array>
+</dict>
+</plist>

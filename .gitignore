@@ -1,0 +1,19 @@
+# Swift / Xcode
+.build/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace/xcuserdata
+.swiftpm/
+
+# Environment
+.env
+*.env.local
+
+# Distribution
+dist/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride

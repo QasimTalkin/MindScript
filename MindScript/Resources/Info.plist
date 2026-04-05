@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Hide from Dock and App Switcher — menubar only -->
+    <key>LSUIElement</key>
+    <true/>
+
+    <!-- Privacy descriptions shown to the user in system dialogs -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>MindScript needs microphone access to capture your voice for transcription. Audio is processed entirely on your device.</string>
+
+    <key>NSAppleEventsUsageDescription</key>
+    <string>MindScript uses Apple Events to re-activate the target application before injecting transcribed text.</string>
+
+    <!-- Custom URL scheme for Stripe redirect: mindscript://upgrade-success -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.mindscript.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>mindscript</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- App metadata -->
+    <key>CFBundleIdentifier</key>
+    <string>com.mindscript.app</string>
+    <key>CFBundleName</key>
+    <string>MindScript</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleExecutable</key>
+    <string>MindScript</string>
+
+    <!-- Sparkle auto-update feed URL — update after setting up GitHub Releases -->
+    <key>SUFeedURL</key>
+    <string>https://your-domain.com/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>REPLACE_WITH_SPARKLE_PUBLIC_ED_KEY</string>
+
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2024 MindScript. All rights reserved.</string>
+</dict>
+</plist>
