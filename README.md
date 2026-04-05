@@ -32,49 +32,64 @@ I open-sourced it because this should exist for everyone, for free, without a pe
 ---
 
 
-## Run it locally in 3 steps
+## 🚀 Quick Start (Developers)
 
-**Prerequisites:** macOS 13+, Apple Silicon, Xcode Command Line Tools
+If you're building from source and don't have the full Xcode installation, follow these easy steps:
 
-```bash
-xcode-select --install   # skip if already installed
-```
-
+### 1. Build the Project
+Open your terminal and run:
 ```bash
 git clone https://github.com/qasimtalkin/mindscript && cd mindscript
-bash scripts/build.sh
-open dist/MindScript.app
+cd MindScript
+swift build
 ```
 
+### 2. Launch the App
+Run this to start MindScript:
+```bash
+swift run
+```
+*Note: A new 🎙 icon will appear in your Mac menubar. If you don't see any windows, click the icon in your menubar to see settings.*
 
-## 🛠 How to switch Whisper models
+### 3. Setup & Permissions
+On your first launch, MindScript needs two permissions to work:
+- **Microphone:** For recording your voice.
+- **Accessibility:** To automatically "type" the transcription into your active apps.
+*If the app doesn't ask, go to **System Settings > Privacy & Security > Accessibility** and toggle MindScript ON.*
 
-If you have a high-end Mac (M2/M3 with 16GB+ RAM) and want better accuracy, you can switch from the default **Tiny** model to **Base**, **Small**, or **Large**.
+### 4. How to Use
+1.  **Click anywhere** you want to type (Slack, Notion, Chrome, etc.).
+2.  Press **`Ctrl + 0`** to start recording.
+3.  **Speak naturally.** The transcription will stream live into your app.
+4.  Press **`Escape`** to stop and finalize the text.
+
+---
+
+## 🧠 Model Variants & Performance
+
+MindScript uses **WhisperKit** to run OpenAI's Whisper models locally. By default, it is optimized for speed and low memory usage.
+
+| Model | Size | Best For | Requirement |
+| :--- | :---: | :--- | :--- |
+| **Tiny** | ~75MB | Fast dictation, low RAM | 2GB+ RAM (Default) |
+| **Base** | ~145MB | General purpose accuracy | 4GB+ RAM |
+| **Small** | ~450MB | Professional transcription | 8GB+ RAM |
+| **Large-v3**| ~1.5GB | Near-perfect multilingual | 16GB+ RAM (M2+) |
+
+### 🛠 How to switch Whisper models (Step-by-Step)
+
+If you have a high-end Mac (M2/M3 with 16GB+ RAM) and want better accuracy, you can switch models:
 
 1.  **Open the Config File:**
     Navigate to `MindScript/Sources/MindScript/Utilities/Constants.swift`.
 2.  **Change the Model Name:**
-    Find the line `static let freeTierModelName` and change the value:
-    -   `openai_whisper-tiny` (Default, ~75MB)
-    -   `openai_whisper-base` (~145MB)
-    -   `openai_whisper-small` (~450MB)
-    -   `openai_whisper-large-v3` (~1.5GB)
+    Find the line `static let freeTierModelName` and change the value (e.g., `openai_whisper-base`, `openai_whisper-small`, `openai_whisper-large-v3`).
 3.  **Rebuild the App:**
-    From the root of the project, run the build script: `bash scripts/build.sh`
-4.  **Restart MindScript:**
-    Open the newly built app from `dist/MindScript.app`. It will download the new model automatically on the first launch.
+    Run `swift build` and `swift run` again. The new model will download automatically on first launch.
 
 ---
 
-### 2. Grant Permissions
-MindScript needs two one-time permissions to work:
-- **Microphone:** To hear you.
-- **Accessibility:** To "type" the text into your active apps.
-
-### 3. Start Talking
-- **Ctrl + 0**: Start recording.
-- **Escape**: Stop and finalize.
-- **Menubar**: Change language or settings.
+## 🛠 How to switch Whisper models
 
 ---
 
