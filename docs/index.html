@@ -3,8 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindScript | The Mac's Missing Voice-to-Text Layer</title>
-    <meta name="description" content="Free, 100% private multilingual voice-to-text for Mac. Powered by Whisper, accelerated by the Apple Neural Engine.">
+    
+    <!-- Primary Meta Tags -->
+    <title>MindScript | Private Local Voice-to-Text for Mac (OpenAI Whisper)</title>
+    <meta name="title" content="MindScript | Private Local Voice-to-Text for Mac (OpenAI Whisper)">
+    <meta name="description" content="MindScript is a free, 100% private multilingual voice-to-text layer for macOS. Powered by OpenAI Whisper and accelerated by the Apple Neural Engine. No cloud, no subscriptions.">
+    <meta name="keywords" content="whisper for mac, macOS voice to text, speech to text mac, local ai transcription, apple silicon ai, otter alternative mac, private dictation macos, whisperkit mac">
+    <meta name="author" content="MindScript Open Source">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/qasimtalkin/mindscript">
+    <meta property="og:title" content="MindScript | Private Local Voice-to-Text for Mac">
+    <meta property="og:description" content="100% On-Device Whisper transcription for macOS. Fast, secure, and always free. Optimized for M1, M2, and M3 chips.">
+    <meta property="og:image" content="../social_preview_final_1775424165641.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://github.com/qasimtalkin/mindscript">
+    <meta property="twitter:title" content="MindScript | Private Local Voice-to-Text for Mac">
+    <meta property="twitter:description" content="100% On-Device Whisper transcription for macOS. Fast, secure, and always free. Optimized for M1, M2, and M3 chips.">
+    <meta property="twitter:image" content="../social_preview_final_1775424165641.png">
+
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MindScript",
+      "operatingSystem": "macOS 13.0+",
+      "applicationCategory": "ProductivityApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "MindScript is a free, local-first voice-to-text tool for Mac. It uses WhisperKit and the Apple Neural Engine for 100% private transcription.",
+      "featureList": "On-device AI, Live text streaming, Multilingual support, Global keyboard shortcuts, Privacy-first design",
+      "downloadUrl": "https://github.com/qasimtalkin/mindscript/releases"
+    }
+    </script>
+
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,12 +63,14 @@
 
     <header class="hero">
         <div class="hero-content">
-            <h1 class="reveal-text">Your brain is faster than your hands.</h1>
-            <p class="subtitle fade-in">The Mac's missing voice-to-text layer. 100% Private. Always Free.</p>
+            <div class="section-badge fade-in">Built for Apple Silicon</div>
+            <h1 class="reveal-text">MindScript: Private Local Voice-to-Text for Mac.</h1>
+            <p class="subtitle fade-in">The zero-cloud, 100% private alternative to Otter and built-in Dictation. Powered by Whisper, optimized for the Apple Neural Engine.</p>
             <div class="cta-group fade-in-up">
-                <a href="https://github.com/qasimtalkin/mindscript/releases" class="btn-primary">Download for Mac</a>
-                <a href="https://github.com/qasimtalkin/mindscript" class="btn-secondary">View Source</a>
+                <a href="https://github.com/qasimtalkin/mindscript/releases" class="btn-primary">Get it for Mac (Free)</a>
+                <a href="https://github.com/qasimtalkin/mindscript" class="btn-secondary">Star on GitHub</a>
             </div>
+            <p class="trust-badge fade-in">No subscriptions · No accounts · No telemetry</p>
         </div>
         <div class="hero-visual fade-in">
             <div class="glass-card mockup">
@@ -42,42 +83,42 @@
                     <div class="waveform">
                         <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
                     </div>
-                    <p class="transcription-text">"MindScript is the future of local-first AI..."</p>
+                    <p class="transcription-text">"Transcription starts instantly. No servers required."</p>
                 </div>
             </div>
         </div>
     </header>
 
     <section id="features" class="features">
-        <div class="section-badge">Features</div>
-        <h2>Powerful. Private. Proven.</h2>
+        <div class="section-badge">Capabilities</div>
+        <h2>The future of dictation is local.</h2>
         <div class="features-grid">
             <div class="feature-card">
                 <div class="icon">🔒</div>
-                <h3>100% On-Device</h3>
-                <p>Your audio never leaves your Mac. Zero cloud, zero tracking, total privacy.</p>
+                <h3>100% On-Device AI</h3>
+                <p>Your audio never leaves your Mac. Zero cloud, zero tracking, total privacy for sensitive meetings and notes.</p>
             </div>
             <div class="feature-card">
                 <div class="icon">⚡️</div>
-                <h3>Apple Neural Engine</h3>
-                <p>Optimized for M1/M2/M3 chips using CoreML for near-instant transcription.</p>
+                <h3>Neural Engine Optimized</h3>
+                <p>M1, M2, M3, and M4 optimized. Uses WhisperKit (CoreML) for maximum speed and minimal battery drain.</p>
             </div>
             <div class="feature-card">
                 <div class="icon">🌍</div>
-                <h3>17+ Languages</h3>
-                <p>Speak naturally. MindScript auto-detects English, Spanish, French, Urdu, and more.</p>
+                <h3>Global Language Support</h3>
+                <p>Supports 17+ languages out of the box with intelligent auto-detection. Speak naturally, in any tongue.</p>
             </div>
             <div class="feature-card">
                 <div class="icon">🎯</div>
-                <h3>System-Wide</h3>
-                <p>One hotkey to transcribe directly into Notion, Slack, Xcode, or any app.</p>
+                <h3>Context-Free Typing</h3>
+                <p>One global hotkey (Ctrl+0) to transcribe directly into Notion, Slack, Xcode, or any app you have open.</p>
             </div>
         </div>
     </section>
 
     <section id="comparison" class="comparison">
-        <div class="section-badge">Comparison</div>
-        <h2>Why we built it.</h2>
+        <div class="section-badge">The Better Choice</div>
+        <h2>Comparison at a glance.</h2>
         <div class="glass-card table-wrapper">
             <table>
                 <thead>
@@ -90,26 +131,26 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Privacy</td>
-                        <td class="check">✅ Local</td>
-                        <td class="cross">❌ Cloud</td>
-                        <td class="cross">❌ Cloud</td>
+                        <td><strong>Privacy</strong></td>
+                        <td class="check">✅ Local Only</td>
+                        <td class="cross">❌ Cloud Sync</td>
+                        <td class="cross">❌ Cloud Storage</td>
                     </tr>
                     <tr>
-                        <td>Price</td>
+                        <td><strong>Price</strong></td>
+                        <td class="check">✅ Free Forever</td>
                         <td class="check">✅ Free</td>
-                        <td class="check">✅ Free</td>
-                        <td class="cross">❌ $$$</td>
+                        <td class="cross">❌ Subscription</td>
                     </tr>
                     <tr>
-                        <td>Live Streaming</td>
-                        <td class="check">✅ Yes</td>
+                        <td><strong>Live Streaming</strong></td>
+                        <td class="check">✅ Real-time</td>
                         <td class="cross">❌ No</td>
                         <td class="warn">⚠️ Delayed</td>
                     </tr>
                     <tr>
-                        <td>Open Source</td>
-                        <td class="check">✅ Yes</td>
+                        <td><strong>Custom Models</strong></td>
+                        <td class="check">✅ Swappable</td>
                         <td class="cross">❌ No</td>
                         <td class="cross">❌ No</td>
                     </tr>
@@ -120,10 +161,11 @@
 
     <footer>
         <div class="footer-content">
-            <p>© 2024 MindScript. Built with ❤️ for the Mac community.</p>
+            <p>© 2024 MindScript Open Source. Built with ❤️ for Mac Power Users.</p>
             <div class="footer-links">
                 <a href="https://github.com/qasimtalkin/mindscript">GitHub</a>
-                <a href="https://github.com/qasimtalkin/mindscript/issues">Issues</a>
+                <a href="https://github.com/qasimtalkin/mindscript/issues">Support</a>
+                <a href="https://github.com/qasimtalkin/mindscript/stargazers">Stargazers</a>
             </div>
         </div>
     </footer>

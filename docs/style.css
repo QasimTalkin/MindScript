@@ -82,6 +82,7 @@ h1 {
     font-weight: 800;
     background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -91,6 +92,15 @@ h1 {
     max-width: 600px;
     margin-bottom: 2.5rem;
     font-weight: 500;
+}
+
+.trust-badge {
+    color: var(--accent);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
 }
 
 .btn-primary {

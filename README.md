@@ -47,7 +47,7 @@ open dist/MindScript.app
 ```
 
 
-## 🛠 How to switch Whisper models (Step-by-Step)
+## 🛠 How to switch Whisper models
 
 If you have a high-end Mac (M2/M3 with 16GB+ RAM) and want better accuracy, you can switch from the default **Tiny** model to **Base**, **Small**, or **Large**.
 
