@@ -9,6 +9,8 @@ struct MenuBarView: View {
             Divider()
             statusSection
             Divider()
+            modelSection
+            Divider()
             languageSection
             Divider()
             footer
@@ -41,6 +43,10 @@ struct MenuBarView: View {
                     .foregroundColor(.secondary)
             }
 
+            if !state.isModelDownloaded {
+                modelLoadingProgress
+            }
+
             if !state.lastTranscription.isEmpty {
                 Text("\"\(state.lastTranscription.prefix(80))\(state.lastTranscription.count > 80 ? "…" : "")\"")
                     .font(.caption)
@@ -59,6 +65,26 @@ struct MenuBarView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
+    }
+
+    private var modelSection: some View {
+        HStack {
+            Text("Model")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Spacer()
+            Picker("", selection: Binding(
+                get: { state.selectedModel ?? (state.userTier == .pro ? Constants.proTierModelName : Constants.freeTierModelName) },
+                set: { state.selectedModel = $0 }
+            )) {
+                Text("Whisper Tiny").tag(Constants.freeTierModelName)
+                Text("Whisper Base").tag(Constants.proTierModelName)
+            }
+            .labelsHidden()
+            .frame(width: 140)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
     private var languageSection: some View {
@@ -80,6 +106,44 @@ struct MenuBarView: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+    }
+
+    private var modelLoadingProgress: some View {
+        let p = state.modelDownloadProgress
+        let hasRealProgress = p >= 0.05   // HuggingFace CDN often omits Content-Length, so
+                                           // fractionCompleted stays 0 until chunks arrive
+        let pct = Int(p * 100)
+        let phase: String = if p < 0.7 { "Downloading model…" }
+                            else if p < 1.0 { "Loading into memory…" }
+                            else { "Ready" }
+
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(phase)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Spacer()
+                if hasRealProgress {
+                    Text("\(pct)%")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundColor(.secondary)
+                } else {
+                    // No granular data yet — show spinner instead of a lying "0%"
+                    ProgressView()
+                        .scaleEffect(0.55)
+                        .frame(width: 14, height: 14)
+                }
+            }
+            if hasRealProgress {
+                ProgressView(value: p)
+                    .progressViewStyle(.linear)
+                    .tint(.accentColor)
+            } else {
+                // Indeterminate linear bar (animates automatically)
+                ProgressView()
+                    .progressViewStyle(.linear)
+            }
+        }
     }
 
     private var accessibilityPrompt: some View {
@@ -125,6 +189,7 @@ struct MenuBarView: View {
     private var statusColor: Color {
         if state.isRecording { return .red }
         if state.isTranscribing { return .orange }
+        if !state.isModelDownloaded { return .yellow }
         if state.errorMessage != nil { return .yellow }
         return .green
     }
@@ -132,7 +197,9 @@ struct MenuBarView: View {
     private var statusText: String {
         if state.isRecording { return "Recording… press Esc to finish" }
         if state.isTranscribing { return "Transcribing…" }
-        if !state.isModelDownloaded { return "Loading Whisper model… (first run only)" }
+        if !state.isModelDownloaded {
+            return state.modelDownloadProgress < 0.7 ? "Downloading Whisper model…" : "Loading Whisper model…"
+        }
         if state.errorMessage == "needs_accessibility" { return "Permission required" }
         return "Ready — press ⌃0 to start"
     }

@@ -28,6 +28,24 @@ final class AppState {
         didSet { UserDefaults.standard.set(transcriptionLanguage, forKey: "transcriptionLanguage") }
     }
 
+    // Model selection — nil defaults to tier-based base/tiny
+    var selectedModel: String? {
+        didSet {
+            UserDefaults.standard.set(selectedModel, forKey: "selectedModel")
+            // Trigger a warmup if the model changed
+            Task {
+                try? await TranscriptionService.shared.warmup()
+            }
+        }
+    }
+
+    var currentModelDisplayName: String {
+        let name = selectedModel ?? (userTier == .pro ? Constants.proTierModelName : Constants.freeTierModelName)
+        if name.contains("tiny") { return "Whisper Tiny" }
+        if name.contains("base") { return "Whisper Base" }
+        return name
+    }
+
     // Onboarding
     var hasCompletedOnboarding = false
     var isModelDownloaded = false
@@ -36,6 +54,7 @@ final class AppState {
     private init() {
         hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
         transcriptionLanguage = UserDefaults.standard.string(forKey: "transcriptionLanguage")
+        selectedModel = UserDefaults.standard.string(forKey: "selectedModel")
     }
 }
 

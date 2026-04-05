@@ -32,36 +32,42 @@ I open-sourced it because this should exist for everyone, for free, without a pe
 ---
 
 
+
+
 ## 🚀 Quick Start (Developers)
 
-If you're building from source and don't have the full Xcode installation, follow these easy steps:
+No Xcode required — just the Xcode Command Line Tools and Swift.
 
-### 1. Build the Project
-Open your terminal and run:
+### 1. Clone & enter the package
 ```bash
-git clone https://github.com/qasimtalkin/mindscript && cd mindscript
-cd MindScript
-swift build
+git clone https://github.com/qasimtalkin/mindscript && cd mindscript/mindscript
 ```
 
-### 2. Launch the App
-Run this to start MindScript:
+### 2. Download the models (one-time)
+Models are stored in `mindscript/Models/` — inside the repo, gitignored, never committed.
 ```bash
-swift run
+swift run --package-path Scripts/DownloadModels
 ```
-*Note: A new 🎙 icon will appear in your Mac menubar. If you don't see any windows, click the icon in your menubar to see settings.*
+This downloads `openai_whisper-tiny` (~75 MB) and `openai_whisper-base` (~145 MB) to `Models/`. Run it once; subsequent launches load from that folder instantly with no network call.
 
-### 3. Setup & Permissions
-On your first launch, MindScript needs two permissions to work:
-- **Microphone:** For recording your voice.
-- **Accessibility:** To automatically "type" the transcription into your active apps.
-*If the app doesn't ask, go to **System Settings > Privacy & Security > Accessibility** and toggle MindScript ON.*
+### 3. Build & run
+```bash
+swift run MindScript
+```
+A 🎙 icon appears in your menu bar. Click it to see status and settings.
 
-### 4. How to Use
-1.  **Click anywhere** you want to type (Slack, Notion, Chrome, etc.).
-2.  Press **`Ctrl + 0`** to start recording.
-3.  **Speak naturally.** The transcription will stream live into your app.
-4.  Press **`Escape`** to stop and finalize the text.
+### 4. Grant permissions
+MindScript needs two permissions:
+- **Microphone** — to record your voice
+- **Accessibility** — to type transcriptions into other apps
+
+If the prompt doesn't appear automatically, go to **System Settings → Privacy & Security → Accessibility** and toggle MindScript on.
+
+### 5. Use it
+1. Click wherever you want text to appear (Slack, Notion, Chrome, anything).
+2. Press **`Ctrl + 0`** to start recording.
+3. Speak. Text streams live into the app as you talk.
+4. Press **`Escape`** to stop and finalize.
 
 ---
 
@@ -76,20 +82,12 @@ MindScript uses **WhisperKit** to run OpenAI's Whisper models locally. By defaul
 | **Small** | ~450MB | Professional transcription | 8GB+ RAM |
 | **Large-v3**| ~1.5GB | Near-perfect multilingual | 16GB+ RAM (M2+) |
 
-### 🛠 How to switch Whisper models (Step-by-Step)
+### 🛠 How to switch Whisper models
 
-If you have a high-end Mac (M2/M3 with 16GB+ RAM) and want better accuracy, you can switch models:
-
-1.  **Open the Config File:**
-    Navigate to `MindScript/Sources/MindScript/Utilities/Constants.swift`.
-2.  **Change the Model Name:**
-    Find the line `static let freeTierModelName` and change the value (e.g., `openai_whisper-base`, `openai_whisper-small`, `openai_whisper-large-v3`).
-3.  **Rebuild the App:**
-    Run `swift build` and `swift run` again. The new model will download automatically on first launch.
-
----
-
-## 🛠 How to switch Whisper models
+1. Edit `Sources/MindScript/Utilities/Constants.swift` and change `freeTierModelName` to your preferred variant (`openai_whisper-base`, `openai_whisper-small`, etc.).
+2. Add it to the download script — open `Scripts/DownloadModels/main.swift` and add the model name to the `models` array.
+3. Run `swift run --package-path Scripts/DownloadModels` to fetch it into `Models/`.
+4. Run `swift run MindScript` — it will load the new model from disk immediately.
 
 ---
 
@@ -107,9 +105,10 @@ Pin a specific language in Settings for faster, more accurate results.
 
 | | |
 |---|---|
-| Whisper tiny model | ~75 MB, first launch only |
+| Whisper tiny model | ~75 MB, one-time (`swift run DownloadModels`) |
+| Whisper base model | ~145 MB, one-time (also pre-fetched by the script) |
 | Everything else | Nothing — zero telemetry, zero analytics |
-| Where it's stored | `~/Library/Caches/huggingface/` |
+| Where it's stored | `mindscript/Models/` — repo-local, gitignored |
 
 Your audio never leaves your machine.
 

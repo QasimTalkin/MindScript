@@ -3,17 +3,15 @@ set -euo pipefail
 
 echo "==> MindScript setup"
 
-# 1. Verify Xcode is installed (not just CLI tools)
-if [ ! -d "/Applications/Xcode.app" ]; then
-    echo "ERROR: Xcode is required. Install it from the App Store."
-    echo "       After installing, run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
+# 1. Verify Swift Toolchain
+if xcode-select -p &>/dev/null; then
+    echo "  Swift toolchain: $(xcode-select -p)"
+    echo "  Swift version:   $(swift --version | head -1)"
+else
+    echo "ERROR: Swift toolchain not found."
+    echo "       Please run: xcode-select --install"
     exit 1
 fi
-
-# Switch to Xcode toolchain
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-echo "  Xcode toolchain: $(xcode-select -p)"
-echo "  Swift: $(swift --version | head -1)"
 
 # 2. Install Homebrew dependencies
 if ! command -v brew &>/dev/null; then

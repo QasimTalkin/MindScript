@@ -5,6 +5,19 @@ enum Constants {
     static let freeTierModelName = "openai_whisper-tiny"
     static let proTierModelName  = "openai_whisper-base"
 
+    /// Repo-local directory where WhisperKit models are downloaded.
+    /// Stored in <repo>/mindscript/Models/ and gitignored.
+    static let modelsDirectory: URL = {
+        // Walk up from this source file: Sources/MindScript/Utilities/ → Sources/MindScript/ → Sources/ → package root
+        let here = URL(fileURLWithPath: #file)
+        let packageRoot = here
+            .deletingLastPathComponent()  // Utilities/
+            .deletingLastPathComponent()  // MindScript/
+            .deletingLastPathComponent()  // Sources/
+            .deletingLastPathComponent()  // MindScript package root
+        return packageRoot.appendingPathComponent("Models", isDirectory: true)
+    }()
+
     // Metering — set to .infinity for fully local builds (no server-side limit)
     static let freeMonthlyLimitSeconds: Double = .infinity
     static let meteringSyncIntervalSeconds: TimeInterval = 3600

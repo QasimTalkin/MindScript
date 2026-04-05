@@ -1,0 +1,7 @@
+# Downloaded Whisper/WhisperKit models — large binary files, never commit
+Models/*
+!Models/.gitkeep
+
+# Swift build artifacts
+.build/
+.swiftpm/

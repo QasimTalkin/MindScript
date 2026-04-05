@@ -7,6 +7,6 @@ final class ModelManager {
     private init() {}
 
     var modelName: String {
-        AppState.shared.userTier == .pro ? Constants.proTierModelName : Constants.freeTierModelName
+        AppState.shared.selectedModel ?? (AppState.shared.userTier == .pro ? Constants.proTierModelName : Constants.freeTierModelName)
     }
 }

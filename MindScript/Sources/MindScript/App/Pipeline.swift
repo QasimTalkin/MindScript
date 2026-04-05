@@ -36,6 +36,7 @@ final class Pipeline {
     private func downloadAndWarmModel() async {
         do {
             AppState.shared.isModelDownloaded = false
+            AppState.shared.modelDownloadProgress = 0
             NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
             try await TranscriptionService.shared.warmup()
             AppState.shared.isModelDownloaded = true
