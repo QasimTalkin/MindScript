@@ -1,4 +1,5 @@
 import AVFoundation
+import Accelerate
 import os
 
 /// Manages mic capture via AVAudioEngine.
@@ -97,8 +98,10 @@ final class RecordingManager {
         // Request native format from the hardware, then convert to 16kHz in AudioBuffer.write()
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
             guard let self else { return }
+            let level = Self.rms(buffer: buffer)
             Task { @MainActor in
                 self.buffers.append(buffer)
+                AppState.shared.audioLevel = level
             }
         }
 
@@ -107,5 +110,14 @@ final class RecordingManager {
 
     private func notifyStateChange() {
         NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
+    }
+
+    private static func rms(buffer: AVAudioPCMBuffer) -> Float {
+        guard let data = buffer.floatChannelData?[0] else { return 0 }
+        let count = vDSP_Length(buffer.frameLength)
+        guard count > 0 else { return 0 }
+        var result: Float = 0
+        vDSP_rmsqv(data, 1, &result, count)
+        return result
     }
 }

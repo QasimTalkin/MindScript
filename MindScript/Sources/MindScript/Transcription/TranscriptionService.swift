@@ -104,7 +104,8 @@ actor TranscriptionService {
             sampleLength: 224,
             topK: 5,
             usePrefillPrompt: true,
-            skipSpecialTokens: true
+            skipSpecialTokens: true,
+            noSpeechThreshold: 0.3     // suppress silent/noise-only segments
         )
 
         let results = try await whisperKit.transcribe(audioPath: audioURL.path, decodeOptions: options)
@@ -112,9 +113,28 @@ actor TranscriptionService {
             .map { $0.text }
             .joined(separator: " ")
             .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            .removingWhisperHallucinations()
 
         Logger.transcription.info("Transcribed: \"\(text.prefix(80))\"")
         return text
+    }
+}
+
+private extension String {
+    /// Strips tokens Whisper hallucinates on silence/noise instead of returning empty text.
+    func removingWhisperHallucinations() -> String {
+        let hallucinations: [String] = [
+            "[BLANK_AUDIO]", "[BLANK AUDIO]",
+            "[ Silence ]", "[Silence]", "(silence)",
+            "[INAUDIBLE]", "(inaudible)",
+            "[noise]", "[Noise]", "(noise)",
+            "[music]", "[Music]", "(music)",
+        ]
+        var result = self
+        for token in hallucinations {
+            result = result.replacingOccurrences(of: token, with: "", options: .caseInsensitive)
+        }
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 

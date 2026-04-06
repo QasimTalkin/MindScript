@@ -25,12 +25,25 @@ final class Pipeline {
         Task {
             await downloadAndWarmModel()
             HotKeyManager.shared.register()
-            if !Permissions.accessibilityEnabled {
+            if Permissions.accessibilityEnabled {
+                AppState.shared.errorMessage = nil
+            } else {
                 AppState.shared.errorMessage = "needs_accessibility"
                 NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
+                // Poll silently — clears warning as soon as user grants access.
+                await waitForAccessibility()
             }
             Logger.app.info("Pipeline ready")
         }
+    }
+
+    private func waitForAccessibility() async {
+        while !Permissions.accessibilityEnabled {
+            try? await Task.sleep(for: .seconds(2))
+        }
+        AppState.shared.errorMessage = nil
+        NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
+        Logger.app.info("Accessibility granted")
     }
 
     private func downloadAndWarmModel() async {

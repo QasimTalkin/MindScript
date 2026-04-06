@@ -46,6 +46,9 @@ final class AppState {
         return name
     }
 
+    // Live audio metering — updated from RecordingManager tap
+    var audioLevel: Float = 0
+
     // Onboarding
     var hasCompletedOnboarding = false
     var isModelDownloaded = false

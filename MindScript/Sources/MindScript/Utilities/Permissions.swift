@@ -1,5 +1,6 @@
 import AVFoundation
 import AppKit
+import ApplicationServices
 
 enum Permissions {
     // MARK: - Microphone
@@ -18,12 +19,20 @@ enum Permissions {
         AXIsProcessTrusted()
     }
 
-    /// Opens System Settings → Privacy & Security → Accessibility.
-    /// Only call this when the user explicitly clicks a button — never call automatically.
+    /// Clears the stale TCC entry and prompts macOS to re-register the current binary.
+    /// Every rebuild produces a new binary hash — without resetting, the old hash stays
+    /// trusted and AXIsProcessTrusted() returns false even with the toggle ON.
     static func requestAccessibility() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-            NSWorkspace.shared.open(url)
-        }
+        // Wipe the stale entry so macOS will register the current binary's hash.
+        let reset = Process()
+        reset.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
+        reset.arguments = ["reset", "Accessibility", "com.mindscript.app"]
+        try? reset.run()
+        reset.waitUntilExit()
+
+        // Now prompt — this registers the current binary and shows the system dialog.
+        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+        AXIsProcessTrustedWithOptions(options)
     }
 
     /// Opens System Settings > Privacy & Security > Microphone.

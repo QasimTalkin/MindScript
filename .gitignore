@@ -6,6 +6,13 @@ DerivedData/
 *.xcworkspace/xcuserdata
 .swiftpm/
 
+# Built app bundles
+*.app/
+MindScript/MindScript.app/
+
+# ML Models (large binary files)
+Models/
+
 # Environment
 .env
 *.env.local
@@ -17,3 +24,6 @@ dist/
 .DS_Store
 .AppleDouble
 .LSOverride
+
+# AI tooling
+.claude/

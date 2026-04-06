@@ -38,36 +38,46 @@ I open-sourced it because this should exist for everyone, for free, without a pe
 
 No Xcode required — just the Xcode Command Line Tools and Swift.
 
-### 1. Clone & enter the package
-```bash
-git clone https://github.com/qasimtalkin/mindscript && cd mindscript/mindscript
-```
+**Open Terminal and run these commands:**
 
-### 2. Download the models (one-time)
-Models are stored in `mindscript/Models/` — inside the repo, gitignored, never committed.
+### 1. Clone the repo and navigate to it
 ```bash
-swift run --package-path Scripts/DownloadModels
+git clone https://github.com/qasimtalkin/mindscript
+cd mindscript/MindScript
 ```
-This downloads `openai_whisper-tiny` (~75 MB) and `openai_whisper-base` (~145 MB) to `Models/`. Run it once; subsequent launches load from that folder instantly with no network call.
+You're now in the `mindscript/MindScript` directory. All remaining commands run from here.
 
-### 3. Build & run
+### 2. Build & install to Applications
 ```bash
-swift run MindScript
+bash install.sh
 ```
-A 🎙 icon appears in your menu bar. Click it to see status and settings.
+This script compiles MindScript, wraps it into a proper `.app` bundle with all required frameworks, signs it, and installs it to `/Applications`. This is necessary for macOS to grant Microphone and Accessibility permissions.
 
-### 4. Grant permissions
-MindScript needs two permissions:
+Once installed, launch it:
+```bash
+open /Applications/MindScript.app
+```
+A mic icon appears in your **menu bar** (top-right of screen). Click it to open the control panel.
+
+### 3. Download Whisper model (automatic)
+On first launch, MindScript automatically downloads the Whisper model (~75 MB) in the background. A progress bar appears in the menu bar popover. No manual step needed — just wait a moment and it's ready.
+
+### 4. Grant system permissions
+MindScript needs two one-time permissions:
 - **Microphone** — to record your voice
 - **Accessibility** — to type transcriptions into other apps
 
-If the prompt doesn't appear automatically, go to **System Settings → Privacy & Security → Accessibility** and toggle MindScript on.
+**If permission dialogs don't appear automatically:**
+1. Go to **System Settings → Privacy & Security → Accessibility**
+2. Find MindScript and toggle it on
+3. Restart the app
 
-### 5. Use it
-1. Click wherever you want text to appear (Slack, Notion, Chrome, anything).
-2. Press **`Ctrl + 0`** to start recording.
-3. Speak. Text streams live into the app as you talk.
-4. Press **`Escape`** to stop and finalize.
+### 5. Start transcribing
+1. Open any app (Slack, Notion, Mail, Google Docs, anything).
+2. Click where you want text to appear.
+3. Press **`Ctrl + 0`** to start recording (you'll see a red dot in the menu bar).
+4. Speak naturally. Text appears live as you talk.
+5. Press **`Escape`** when done.
 
 ---
 
@@ -84,10 +94,11 @@ MindScript uses **WhisperKit** to run OpenAI's Whisper models locally. By defaul
 
 ### 🛠 How to switch Whisper models
 
-1. Edit `Sources/MindScript/Utilities/Constants.swift` and change `freeTierModelName` to your preferred variant (`openai_whisper-base`, `openai_whisper-small`, etc.).
-2. Add it to the download script — open `Scripts/DownloadModels/main.swift` and add the model name to the `models` array.
-3. Run `swift run --package-path Scripts/DownloadModels` to fetch it into `Models/`.
-4. Run `swift run MindScript` — it will load the new model from disk immediately.
+Click the mic icon in the menu bar and use the **Model** picker — no rebuild required:
+- **Whisper Tiny** (~75 MB) — fastest, lowest RAM, great for dictation
+- **Whisper Base** (~145 MB) — better accuracy, still lightweight
+
+The selected model is saved and reloaded automatically on next launch. Switching triggers an automatic re-download if the new model isn't cached yet.
 
 ---
 
@@ -105,10 +116,10 @@ Pin a specific language in Settings for faster, more accurate results.
 
 | | |
 |---|---|
-| Whisper tiny model | ~75 MB, one-time (`swift run DownloadModels`) |
-| Whisper base model | ~145 MB, one-time (also pre-fetched by the script) |
+| Whisper tiny model | ~75 MB, auto-downloaded on first launch |
+| Whisper base model | ~145 MB, downloaded when selected in the menu |
 | Everything else | Nothing — zero telemetry, zero analytics |
-| Where it's stored | `mindscript/Models/` — repo-local, gitignored |
+| Where it's stored | `MindScript/Models/` — repo-local, gitignored |
 
 Your audio never leaves your machine.
 
@@ -129,7 +140,7 @@ Your audio never leaves your machine.
 
 ## Requirements
 
-- macOS 13.0+
+- macOS 14.0+
 - Apple Silicon (Intel works but runs slower — Neural Engine is ARM-only)
 - Microphone access
 - Accessibility access (for text injection — one-time grant, survives rebuilds)
