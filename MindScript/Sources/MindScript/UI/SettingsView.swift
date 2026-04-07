@@ -15,11 +15,13 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("Transcription") {
-                Picker("Model", selection: $selectedModel) {
+                Picker("Whisper Model", selection: Binding(
+                    get: { state.selectedModel ?? (state.userTier == .pro ? Constants.proTierModelName : Constants.freeTierModelName) },
+                    set: { state.selectedModel = $0 }
+                )) {
                     Text("Whisper Tiny (faster)").tag(Constants.freeTierModelName)
-                    Text("Whisper Base (more accurate)")
-                        .tag(Constants.proTierModelName)
-                        .disabled(state.userTier != .pro)
+                    Text("Whisper Base (accurate)").tag(Constants.proTierModelName)
+                    Text("Distil Small (EN only)").tag(Constants.distilSmallModelName)
                 }
                 .pickerStyle(.radioGroup)
 
@@ -28,7 +30,50 @@ struct SettingsView: View {
                         Text(lang.name).tag(lang.code)
                     }
                 }
-                Text("Auto-detect works well for most languages. Pin a language for faster, more accurate results when you always speak the same one.")
+                .disabled(state.isLanguageFixed)
+
+                if state.isLanguageFixed {
+                    Text("The selected Distil model is optimized for English only.")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                } else {
+                    Text("Auto-detect works well for most languages. Pin a language for faster, more accurate results when you always speak the same one.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Section("AI Summarisation") {
+                Toggle("Enable Auto-summarize", isOn: Binding(
+                    get: { state.summarizeNotesEnabled },
+                    set: { state.summarizeNotesEnabled = $0 }
+                ))
+                
+                Picker("Provider", selection: Binding(
+                    get: { state.summarizationProviderType },
+                    set: { val in
+                        state.summarizationProviderType = val
+                        state.summarizationModel = val.defaultModel
+                    }
+                )) {
+                    ForEach(AISummarisationProviderType.allCases) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+                
+                TextField("Model", text: Binding(
+                    get: { state.summarizationModel },
+                    set: { state.summarizationModel = $0 }
+                ))
+                
+                if state.summarizationProviderType.requiresApiKey {
+                    SecureField("API Key", text: Binding(
+                        get: { state.summarizationApiKey ?? "" },
+                        set: { state.summarizationApiKey = $0 }
+                    ))
+                }
+                
+                Text("Summaries are generated locally via Ollama by default. You can also use OpenAI or Anthropic by providing an API key.")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
