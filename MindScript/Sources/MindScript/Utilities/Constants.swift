@@ -4,6 +4,11 @@ enum Constants {
     // Tier model names
     static let freeTierModelName = "openai_whisper-tiny"
     static let proTierModelName  = "openai_whisper-base"
+    static let distilSmallModelName = "distil-whisper_distil-small.en"
+
+    // Summarisation defaults
+    static let defaultSummarisationModel = "glm-4.7-flash:latest"
+    static let defaultOllamaHost = "http://localhost:11434"
 
     /// Repo-local directory where WhisperKit models are downloaded.
     /// Stored in <repo>/mindscript/Models/ and gitignored.
