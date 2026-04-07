@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindScript - Free Multilingual Personal Scribe</title>
+    <meta name="description" content="Local, instant voice-to-text for Mac. No cloud. No subscription. No one listening.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #050505;
+            --card: #151515;
+            --text: #FFFFFF;
+            --text-dim: #A0A0A0;
+            --acc-grad: linear-gradient(135deg, #007AFF 0%, #00C6FF 100%);
+        }
+        
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Nav */
+        nav {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; margin-left: 2rem; font-weight: 500; transition: 0.2s; }
+        .nav-links a:hover { color: var(--text); }
+
+        /* Hero */
+        .hero {
+            padding: 6rem 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -2px;
+            background: var(--acc-grad);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 1.5rem auto 3rem;
+            font-weight: 300;
+        }
+        .cta-btn {
+            background: var(--acc-grad);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 99px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,122,255,0.3);
+            transition: 0.3s transform;
+        }
+        .cta-btn:hover { transform: translateY(-3px); }
+
+        /* Showcase */
+        .showcase {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-top: 4rem;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+        }
+        .showcase img {
+            width: 100%;
+            border-radius: 16px;
+            display: block;
+        }
+
+        /* Features */
+        .features {
+            padding: 8rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            padding: 2.5rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .feature-card h3 { font-size: 1.5rem; margin: 1rem 0; }
+        .feature-icon { font-size: 2rem; }
+
+        /* Instructions */
+        .steps {
+            padding-bottom: 8rem;
+        }
+        pre {
+            background: #000;
+            padding: 1.5rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid #333;
+            font-family: monospace;
+            color: #00FF00;
+        }
+
+        footer {
+            padding: 4rem 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-dim);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">MindScript</div>
+            <div class="nav-links">
+                <a href="https://github.com/qasimtalkin/mindscript">GitHub</a>
+                <a href="https://github.com/qasimtalkin/mindscript/releases">Download</a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <h1>Your voice, directly to text.</h1>
+            <p class="subtitle">100% On-device. Zero cost. Multilingual. The fastest way to get thoughts from your brain to any app.</p>
+            <a href="https://github.com/qasimtalkin/mindscript/releases/latest" class="cta-btn">
+                <span>Download for macOS</span>
+            </a>
+
+            <div class="showcase">
+                <!-- Main Demo GIF Placeholder -->
+                <img src="assets/transcription_demo.gif" alt="MindScript Demo - voice text appearing live at cursor">
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Private & Local</h3>
+                <p>Runs OpenAI Whisper locally on the Apple Neural Engine. Your audio never leaves your Mac. Zero telemetry.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h3>AI Summaries</h3>
+                <p>Auto-generate bulleted summaries of your notes using local LLMs (Ollama) or your favorite cloud provider.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Global Hotkey</h3>
+                <p>Press Ctrl+0 and speak in any app — Slack, Notion, Teams, or Safari. Text appears live at your cursor.</p>
+            </div>
+        </section>
+
+        <section class="steps">
+            <h2>Get Started</h2>
+            <p>For independent developers, install via terminal and follow the setup guide.</p>
+            <pre>
+git clone https://github.com/qasimtalkin/mindscript
+cd mindscript/MindScript
+bash install.sh</pre>
+        </section>
+
+        <footer>
+            Built with ❤️ by Qasim. Open sourced under MIT License.
+        </footer>
+    </div>
+</body>
+</html>

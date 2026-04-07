@@ -5,13 +5,20 @@
 ### Free, local, instant voice-to-text for your Mac.
 ### No cloud. No subscription. No one listening.
 
-[![macOS](https://img.shields.io/badge/macOS-13%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.9-orange?style=flat-square&logo=swift)](https://swift.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE)
-[![On-device](https://img.shields.io/badge/AI-100%25%20On--device-blue?style=flat-square)](https://github.com/argmaxinc/WhisperKit)
-[![No cloud](https://img.shields.io/badge/cloud-none-green?style=flat-square)]()
+[![GitHub Pages](https://img.shields.io/badge/Demo-Landing%20Page-blue?style=flat-square)](https://qasimtalkin.github.io/MindScript/)
+[![Latest Release](https://img.shields.io/github/v/release/qasimtalkin/mindscript?style=flat-square&color=green)](https://github.com/qasimtalkin/mindscript/releases)
 
-</div>
+---
+
+## 🎬 Demo
+
+![MindScript Transcription Demo](docs/assets/transcription_demo.gif)
+*Streaming text live at the cursor using local Whisper.*
+
+---
 
 Press a hotkey. Speak. Text appears at your cursor — live, as you talk — in any app on your machine. Runs entirely on the Apple Neural Engine using open-source Whisper. Zero cost per transcription, forever.
 
@@ -109,6 +116,26 @@ Supports 17 languages out of the box. Default is **Auto-detect** — Whisper fig
 `Auto` · `English` · `Spanish` · `French` · `German` · `Italian` · `Portuguese` · `Russian` · `Chinese` · `Japanese` · `Korean` · `Arabic` · `Hindi` · `Urdu` · `Turkish` · `Dutch` · `Polish`
 
 Pin a specific language in Settings for faster, more accurate results.
+
+---
+
+## ✨ AI Summarisation (Local & Cloud)
+
+MindScript can automatically summarise your voice notes into concise bullet points immediately after transcription.
+
+### 🛠 How to enable & configure
+1. Click the mic icon in your **menu bar**.
+2. Toggle **Auto-summarize** to ON.
+3. To change models or providers, go to **Settings** (via the menu bar icon):
+   - **Provider**: Choose between **Ollama** (Local), **OpenAI**, or **Anthropic (Claude)**.
+   - **Model**: Default is `glm-4.7-flash:latest` for Ollama.
+   - **API Key**: Required only for OpenAI and Anthropic.
+
+> [!TIP]
+> **Ollama Users**: Make sure you have the model pulled locally before use:
+> ```bash
+> ollama pull glm-4.7-flash:latest
+> ```
 
 ---
 
