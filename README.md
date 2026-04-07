@@ -1,4 +1,3 @@
-<div align="center">
 
 # 🎙 MindScript - Free Multilingual Personal Scribe On Mac
 
