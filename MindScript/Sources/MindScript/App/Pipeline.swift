@@ -166,5 +166,17 @@ final class Pipeline {
         AppState.shared.lastTranscription = finalText
         _ = await MeteringService.shared.checkAndIncrement(durationSeconds: duration)
         Logger.app.info("Done: \"\(finalText.prefix(60))\"")
+
+        // Summarisation — fire and forget; result lands in AppState.lastSummary
+        if AppState.shared.summarizeNotesEnabled {
+            Task {
+                do {
+                    _ = try await SummarisationService.shared.summarise(text: finalText)
+                } catch {
+                    AppState.shared.errorMessage = "Summary failed: \(error.localizedDescription)"
+                    NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
+                }
+            }
+        }
     }
 }
