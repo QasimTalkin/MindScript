@@ -13,6 +13,12 @@ struct MenuBarView: View {
             Divider()
             languageSection
             Divider()
+            summarisationSection
+            if state.lastSummary != "" || state.isSummarizing {
+                Divider()
+                summaryPanel
+            }
+            Divider()
             footer
         }
         .frame(width: 300)
@@ -79,6 +85,7 @@ struct MenuBarView: View {
             )) {
                 Text("Whisper Tiny").tag(Constants.freeTierModelName)
                 Text("Whisper Base").tag(Constants.proTierModelName)
+                Text("Distil Small (EN)").tag(Constants.distilSmallModelName)
             }
             .labelsHidden()
             .frame(width: 140)
@@ -87,22 +94,85 @@ struct MenuBarView: View {
         .padding(.vertical, 8)
     }
 
+    private var summarisationSection: some View {
+        HStack {
+            Image(systemName: "sparkles")
+                .foregroundColor(.accentColor)
+                .font(.caption)
+            Text("Auto-summarize")
+                .font(.subheadline)
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { state.summarizeNotesEnabled },
+                set: { state.summarizeNotesEnabled = $0 }
+            ))
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+
+    private var summaryPanel: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("SUMMARY")
+                    .font(.caption2.weight(.bold))
+                    .foregroundColor(.secondary)
+                Spacer()
+                if state.isSummarizing {
+                    ProgressView()
+                        .scaleEffect(0.5)
+                        .frame(width: 12, height: 12)
+                } else {
+                    Button(action: { NSPasteboard.general.clearContents(); NSPasteboard.general.setString(state.lastSummary, forType: .string) }) {
+                        Image(systemName: "doc.on.doc")
+                            .font(.caption2)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Copy summary")
+                }
+            }
+            
+            if state.isSummarizing && state.lastSummary.isEmpty {
+                Text("Thinking…")
+                    .font(.subheadline)
+                    .italic()
+                    .foregroundColor(.secondary)
+            } else {
+                Text(state.lastSummary)
+                    .font(.subheadline)
+                    .textSelection(.enabled)
+                    .lineLimit(6)
+            }
+        }
+        .padding()
+        .background(Color.accentColor.opacity(0.05))
+    }
+
     private var languageSection: some View {
         HStack {
             Text("Language")
                 .font(.caption)
                 .foregroundColor(.secondary)
             Spacer()
-            Picker("", selection: Binding(
-                get: { AppState.shared.transcriptionLanguage },
-                set: { AppState.shared.transcriptionLanguage = $0 }
-            )) {
-                ForEach(Constants.supportedLanguages, id: \.code) { lang in
-                    Text(lang.name).tag(lang.code)
+            if state.isLanguageFixed {
+                Text("English (Fixed)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.trailing, 8)
+            } else {
+                Picker("", selection: Binding(
+                    get: { AppState.shared.transcriptionLanguage },
+                    set: { AppState.shared.transcriptionLanguage = $0 }
+                )) {
+                    ForEach(Constants.supportedLanguages, id: \.code) { lang in
+                        Text(lang.name).tag(lang.code)
+                    }
                 }
+                .labelsHidden()
+                .frame(width: 140)
             }
-            .labelsHidden()
-            .frame(width: 140)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
