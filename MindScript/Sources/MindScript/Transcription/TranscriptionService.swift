@@ -3,8 +3,8 @@ import Foundation
 import os
 
 /// Wraps WhisperKit with a single warm instance.
-/// WhisperKit manages its own model download/cache location automatically.
-/// We do NOT pass a custom modelFolder — that would require models to already be compiled.
+/// Models are cached in the local Models/ directory.
+/// On first use of a model it is downloaded once; all subsequent launches load from disk.
 actor TranscriptionService {
     static let shared = TranscriptionService()
 
@@ -15,46 +15,52 @@ actor TranscriptionService {
 
     // MARK: - Warmup
 
-    /// Loads (and downloads if needed) the Whisper model.
-    /// Reports progress to AppState.modelDownloadProgress (0.0 – 1.0):
-    ///   0–70%  = download phase
-    ///   70–100% = model-load phase
+    /// Ensures the model is on disk (downloading once if needed), then loads it into memory.
+    /// Subsequent calls for the same model return immediately.
     func warmup() async throws {
         let modelName = ModelManager.shared.modelName
-        guard loadedModelName != modelName else { return }   // already warm
+        guard loadedModelName != modelName else { return }
 
-        Logger.transcription.info("Loading WhisperKit model: \(modelName)")
+        Logger.transcription.info("Warming up WhisperKit model: \(modelName)")
 
-        // Seed a nonzero value immediately so the bar doesn't stick at 0%
         await MainActor.run {
             AppState.shared.modelDownloadProgress = 0.02
             NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
         }
 
-        // Phase 1: download (0.02 → 0.7)
-        // Note: HuggingFace Hub SDK reports fractionCompleted only once total size is known,
-        // so it often fires at 0. We clamp to at least 0.02 and force to 0.7 after it returns.
-        let modelFolder = try await WhisperKit.download(
-            variant: modelName,
-            downloadBase: Constants.modelsDirectory
-        ) { progress in
-            let reported = progress.fractionCompleted
-            guard reported > 0.01 else { return }  // skip spurious 0% callbacks
-            let fraction = max(0.02, min(reported, 1.0) * 0.68 + 0.02)
-            Task { @MainActor in
-                AppState.shared.modelDownloadProgress = fraction
-                NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
+        // Phase 1 — download only if the model folder is not already on disk.
+        let modelFolder = Constants.modelsDirectory
+            .appendingPathComponent("models/argmaxinc/whisperkit-coreml/\(modelName)")
+
+        if !FileManager.default.fileExists(atPath: modelFolder.path) {
+            Logger.transcription.info("Model not cached — downloading \(modelName)")
+            let downloadStartTime = Date()
+            _ = try await WhisperKit.download(
+                variant: modelName,
+                downloadBase: Constants.modelsDirectory
+            ) { progress in
+                let reported = progress.fractionCompleted
+                guard reported > 0.01 else { return }
+                let fraction = max(0.02, min(reported, 1.0) * 0.65 + 0.02)
+                let elapsed = Date().timeIntervalSince(downloadStartTime)
+                let eta = elapsed > 2 ? formatDownloadETA((1.0 - reported) / (reported / elapsed)) : nil
+                Task { @MainActor in
+                    AppState.shared.modelDownloadProgress = fraction
+                    AppState.shared.modelDownloadETA = eta
+                    NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
+                }
             }
+            Logger.transcription.info("Download complete — model cached at \(modelFolder.path)")
         }
 
-        // Download done (cached or freshly downloaded) — advance to load phase
+        await MainActor.run { AppState.shared.modelDownloadETA = nil }
+
+        // Phase 2 — load from disk (0.7 → 1.0)
         await MainActor.run {
             AppState.shared.modelDownloadProgress = 0.7
             NotificationCenter.default.post(name: .mindscriptStateChanged, object: nil)
         }
 
-        // Phase 2: load (0.7 → 1.0)
-        // Init with load: false so we can attach the callback before loading starts.
         let kit = try await WhisperKit(WhisperKitConfig(
             model: modelName,
             modelFolder: modelFolder.path,
@@ -67,8 +73,8 @@ actor TranscriptionService {
 
         kit.modelStateCallback = { _, newState in
             let fraction: Double = switch newState {
-                case .loading:    0.75
-                case .prewarming: 0.90
+                case .loading:    0.5
+                case .prewarming: 0.85
                 case .loaded:     1.0
                 default:          AppState.shared.modelDownloadProgress
             }
@@ -118,6 +124,16 @@ actor TranscriptionService {
         Logger.transcription.info("Transcribed: \"\(text.prefix(80))\"")
         return text
     }
+}
+
+private func formatDownloadETA(_ seconds: Double) -> String {
+    guard seconds > 0, seconds.isFinite else { return "" }
+    let s = Int(seconds)
+    if s < 60  { return "~\(s) sec" }
+    let m = s / 60
+    let r = s % 60
+    if m >= 2  { return "~\(m) min" }
+    return "~\(m) min \(r) sec"
 }
 
 private extension String {

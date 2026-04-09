@@ -73,7 +73,9 @@ final class Pipeline {
             guard let self else { return }
             try? await Task.sleep(for: .seconds(1.5))
             while AppState.shared.isRecording {
-                await self.streamChunk()
+                if !AppState.shared.isPaused {
+                    await self.streamChunk()
+                }
                 try? await Task.sleep(for: .seconds(1.2))
             }
         }

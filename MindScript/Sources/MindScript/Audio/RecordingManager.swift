@@ -48,9 +48,31 @@ final class RecordingManager {
         }
     }
 
+    /// Pause recording — mic tap removed, buffers preserved, no transcription yet.
+    func pauseRecording() {
+        guard AppState.shared.isRecording, !AppState.shared.isPaused else { return }
+        engine.inputNode.removeTap(onBus: 0)
+        AppState.shared.isPaused = true
+        AppState.shared.audioLevel = 0
+        notifyStateChange()
+        TranscriptionOverlay.shared.show(state: .paused)
+        Logger.recording.info("Recording paused")
+    }
+
+    /// Resume recording — reinstalls mic tap, continues accumulating.
+    func resumeRecording() {
+        guard AppState.shared.isRecording, AppState.shared.isPaused else { return }
+        installTap()
+        AppState.shared.isPaused = false
+        notifyStateChange()
+        TranscriptionOverlay.shared.show(state: .recording)
+        Logger.recording.info("Recording resumed")
+    }
+
     /// Stop recording and kick off transcription.
     func stopRecording() {
         guard AppState.shared.isRecording else { return }
+        AppState.shared.isPaused = false
         stopEngine()
 
         let captured = buffers
@@ -72,6 +94,7 @@ final class RecordingManager {
     /// Cancel recording — discard audio, no transcription.
     func cancelRecording() {
         guard AppState.shared.isRecording else { return }
+        AppState.shared.isPaused = false
         stopEngine()
         buffers = []
         recordingStartTime = nil
@@ -91,10 +114,13 @@ final class RecordingManager {
     private func startEngine() throws {
         engine.reset()
         buffers = []
+        installTap()
+        try engine.start()
+    }
 
+    private func installTap() {
         let inputNode = engine.inputNode
         let inputFormat = inputNode.inputFormat(forBus: 0)
-
         // Request native format from the hardware, then convert to 16kHz in AudioBuffer.write()
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
             guard let self else { return }
@@ -104,8 +130,6 @@ final class RecordingManager {
                 AppState.shared.audioLevel = level
             }
         }
-
-        try engine.start()
     }
 
     private func notifyStateChange() {

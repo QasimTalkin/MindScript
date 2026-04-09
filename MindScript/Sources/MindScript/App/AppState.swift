@@ -7,6 +7,7 @@ final class AppState {
 
     // Recording / transcription lifecycle
     var isRecording = false
+    var isPaused = false
     var isTranscribing = false
     var lastTranscription: String = ""
     var partialTranscription: String = ""   // live text shown while recording
@@ -75,6 +76,7 @@ final class AppState {
     var hasCompletedOnboarding = false
     var isModelDownloaded = false
     var modelDownloadProgress: Double = 0
+    var modelDownloadETA: String? = nil   // e.g. "~2 min 30 sec", nil when unknown or loading
 
     private init() {
         hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")

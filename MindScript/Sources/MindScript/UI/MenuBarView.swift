@@ -180,36 +180,41 @@ struct MenuBarView: View {
 
     private var modelLoadingProgress: some View {
         let p = state.modelDownloadProgress
-        let hasRealProgress = p >= 0.05   // HuggingFace CDN often omits Content-Length, so
-                                           // fractionCompleted stays 0 until chunks arrive
         let pct = Int(p * 100)
-        let phase: String = if p < 0.7 { "Downloading model…" }
-                            else if p < 1.0 { "Loading into memory…" }
-                            else { "Ready" }
+        let isDownloading = p < 0.7
+        let phase = isDownloading ? "Downloading model…" : "Loading into memory…"
 
         return VStack(alignment: .leading, spacing: 4) {
-            HStack {
+            HStack(alignment: .firstTextBaseline) {
                 Text(phase)
                     .font(.caption2)
                     .foregroundColor(.secondary)
                 Spacer()
-                if hasRealProgress {
-                    Text("\(pct)%")
-                        .font(.caption2.monospacedDigit())
-                        .foregroundColor(.secondary)
+                if p >= 0.05 {
+                    HStack(spacing: 3) {
+                        Text("\(pct)%")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundColor(.secondary)
+                        if let eta = state.modelDownloadETA, isDownloading {
+                            Text("·")
+                                .font(.caption2)
+                                .foregroundColor(.secondary.opacity(0.5))
+                            Text(eta)
+                                .font(.caption2)
+                                .foregroundColor(.secondary.opacity(0.7))
+                        }
+                    }
                 } else {
-                    // No granular data yet — show spinner instead of a lying "0%"
                     ProgressView()
                         .scaleEffect(0.55)
                         .frame(width: 14, height: 14)
                 }
             }
-            if hasRealProgress {
+            if p >= 0.05 {
                 ProgressView(value: p)
                     .progressViewStyle(.linear)
                     .tint(.accentColor)
             } else {
-                // Indeterminate linear bar (animates automatically)
                 ProgressView()
                     .progressViewStyle(.linear)
             }

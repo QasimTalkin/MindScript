@@ -42,17 +42,17 @@ final class TranscriptionOverlay {
     }
 }
 
-enum OverlayState { case recording, transcribing }
+enum OverlayState { case recording, paused, transcribing }
 
 // Root wrapper so we can swap state without recreating the panel
 struct OverlayRootView: View {
     let state: OverlayState
     var body: some View {
         ZStack {
-            if state == .recording {
-                RecordingPill()
-            } else {
-                TranscribingPill()
+            switch state {
+            case .recording:    RecordingPill()
+            case .paused:       PausedPill()
+            case .transcribing: TranscribingPill()
             }
         }
         .frame(width: 420, height: 96)
@@ -76,20 +76,10 @@ private struct RecordingPill: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
 
-            // Right — escape hint
-            VStack(alignment: .center, spacing: 2) {
-                Text("esc")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white.opacity(0.55))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 3)
-                    .background(
-                        RoundedRectangle(cornerRadius: 5)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                    )
-                Text("inject")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white.opacity(0.3))
+            // Right — key hints
+            HStack(spacing: 10) {
+                KeyHint(label: "⌥space", action: "pause")
+                KeyHint(label: "⌥esc", action: "inject")
             }
         }
         .padding(.horizontal, 20)
@@ -107,6 +97,68 @@ private struct RecordingPill: View {
             levels.removeFirst()
             levels.append(amplified)
         }
+    }
+}
+
+// MARK: - Shared key hint badge
+
+private struct KeyHint: View {
+    let label: String
+    let action: String
+
+    var body: some View {
+        VStack(alignment: .center, spacing: 2) {
+            Text(label)
+                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .foregroundColor(.white.opacity(0.55))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                )
+            Text(action)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundColor(.white.opacity(0.3))
+        }
+    }
+}
+
+// MARK: - Paused pill
+
+private struct PausedPill: View {
+    var body: some View {
+        HStack(spacing: 16) {
+            // Pause icon — two static vertical bars
+            HStack(spacing: 4) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white.opacity(0.45))
+                    .frame(width: 4, height: 18)
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.white.opacity(0.45))
+                    .frame(width: 4, height: 18)
+            }
+
+            Text("Paused")
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundColor(.white.opacity(0.6))
+
+            Spacer()
+
+            // Key hints
+            HStack(spacing: 10) {
+                KeyHint(label: "⌥space", action: "resume")
+                KeyHint(label: "⌥esc", action: "inject")
+            }
+        }
+        .padding(.horizontal, 20)
+        .frame(height: 64)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(white: 0.09))
+                .shadow(color: .black.opacity(0.55), radius: 24, x: 0, y: 10)
+        )
+        .padding(16)
     }
 }
 

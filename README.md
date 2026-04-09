@@ -81,9 +81,10 @@ MindScript needs two one-time permissions:
 ### 5. Start transcribing
 1. Open any app (Slack, Notion, Mail, Google Docs, anything).
 2. Click where you want text to appear.
-3. Press **`Ctrl + 0`** to start recording (you'll see a red dot in the menu bar).
-4. Speak naturally. Text appears live as you talk.
-5. Press **`Escape`** when done.
+3. Press **`⌥ 0`** (Option + 0) to start recording — a recording pill appears on screen.
+4. Speak naturally. Text streams live as you talk.
+5. Press **`⌥ Space`** to pause / resume at any time.
+6. Press **`⌥ Esc`** when done — text is injected at your cursor.
 
 ---
 
